@@ -7,8 +7,8 @@
 # Latest Demo
 - 준비 중...
 
-# New Features/Updates
-- 준비 중...
+# ⚡️New Features/Updates
+- 🔄 AI Part: Basic Function Complete before testing
 
 # Specification
 - Model: [Qwen2.5-Coder-32B-Instruct-GGUF](https://github.com/QwenLM/Qwen2.5-Coder)
