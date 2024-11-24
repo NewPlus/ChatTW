@@ -1,127 +1,91 @@
-# Standard Library
-
-# Third Party Library
+from typing import Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import aiohttp
 
-# Custom Module
-from prompt import code_fix_template, code_generate_template
-from llm.model import code_llm
-
-# FastAPI 인스턴스 생성
-app = FastAPI()
+# FastAPI 앱 생성
+app = FastAPI(title="사내 코딩 챗봇 API")
 
 
-# Pydantic 모델 정의 - 코드 오류 수정 요청 타입
+# 요청 모델 정의
 class CodeRequest(BaseModel):
-    code: str
-    question: str
+    code: Optional[str] = None
+    prompt: str
 
 
-# Pydantic 모델 정의 - 코드 오류 수정 응답 타입
+# 응답 모델 정의
 class CodeResponse(BaseModel):
-    fixed_code: str
-    explanation: str
+    response: str
+    fixed_code: Optional[str] = None
 
 
-# Pydantic 모델 정의 - 코드 생성 요청 타입
-class CodeGenerateRequest(BaseModel):
-    question: str
-
-
-# Pydantic 모델 정의 - 코드 생성 응답 타입
-class CodeGenerateResponse(BaseModel):
-    generated_code: str
-    explanation: str
-
-
-# 코드 오류 수정 엔드포인트
-@app.post("/api/fix-code", response_model=CodeResponse)
-async def fix_code(request: CodeRequest):
+# Ollama API와 통신하는 비동기 함수
+async def generate_ai_response(prompt: str, code: Optional[str] = None) -> str:
+    # Local에서 실행
+    url = "http://localhost:11434/api/generate"
+    
     try:
-        # 프롬프트 생성
-        formatted_prompt = code_fix_template.format(
-            code=request.code,
-            question=request.question
-        )
+        # 코드 수정 모드와 생성 모드에 따른 프롬프트 구성
+        if code:
+            system_prompt = "다음 코드의 오류를 분석하고 수정해주세요:"
+            full_prompt = f"{system_prompt}\n\n{code}\n\n질문: {prompt}"
+        else:
+            system_prompt = "다음 요구사항에 맞는 코드를 생성해주세요:"
+            full_prompt = f"{system_prompt}\n\n{prompt}"
         
-        # LLM을 통한 응답 생성
-        response = await code_llm.generate_response(formatted_prompt)
-        
-        # 응답이 문자열인지 확인
-        if isinstance(response, dict):
-            response = response.get('content', '')
-
-        # 응답 파싱
-        parts = response.split("2. ")
-        if len(parts) != 2:
-            raise HTTPException(status_code=500, detail="응답 형식이 올바르지 않습니다")
-            
-        fixed_code = parts[0].replace("1. 수정된 코드\n", "").strip()
-        explanation = parts[1].strip()
-        
-        return CodeResponse(
-            fixed_code=fixed_code,
-            explanation=explanation
-        )
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# 코드 생성 엔드포인트
-@app.post("/api/generate-code", response_model=CodeGenerateResponse)
-async def generate_code(request: CodeGenerateRequest):
-    try:
-        # 프롬프트 생성
-        formatted_prompt = code_generate_template.format(
-            question=request.question
-        )
-        
-        # LLM을 통한 응답 생성
-        response = await code_llm.generate_response(formatted_prompt)
-        
-        # 응답 파싱
-        parts = response.split("2. ")
-        if len(parts) != 2:
-            raise HTTPException(status_code=500, detail="응답 형식이 올바르지 않습니다")
-            
-        generated_code = parts[0].replace("1. 생성된 코드\n", "").strip()
-        explanation = parts[1].strip()
-        
-        return CodeGenerateResponse(
-            generated_code=generated_code,
-            explanation=explanation
-        )
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# 모델 상태 확인 엔드포인트
-@app.get("/api/model/status")
-async def model_status():
-    """LLM 모델의 상태를 확인합니다."""
-    try:
-        # 간단한 프롬프트로 모델 테스트
-        test_response = await code_llm.generate_response("Hello")
-        return {
-            "status": "healthy",
-            "model_name": code_llm.model_name,
-            "test_response": test_response
+        # 요청 데이터 구성
+        data = {
+            "model": "qwen2.5-coder:0.5b",
+            "prompt": full_prompt,
+            "stream": False
         }
+        
+        # 비동기 컨텍스트에서 동기 함수 실행
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=data) as response:
+                if response.status != 200:
+                    raise HTTPException(
+                        status_code=response.status,
+                        detail=f"AI 모델 서버 오류: {await response.text()}"
+                    )
+                    
+                result = await response.json()
+                return result['response']
+    
+    # 예외 처리
+    except aiohttp.ClientError as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"AI 모델 서버 연결 오류: {str(e)}"
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"모델 상태 확인 실패: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"AI 처리 중 오류 발생: {str(e)}"
+        )
 
-# 모델 재로드 엔드포인트
-@app.post("/api/model/reload")
-async def reload_model():
-    """LLM 모델을 재로드합니다."""
-    try:
-        code_llm.reload_model()
-        return {"status": "success", "message": "모델이 성공적으로 재로드되었습니다."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"모델 재로드 실패: {str(e)}")
+# 코드 수정 및 생성 엔드포인트
+@app.post("/generate/", response_model=CodeResponse)
+async def generate_code(request: CodeRequest):
+    """
+    코드 수정 또는 생성 요청을 처리합니다.
+    - code가 제공되면 코드 수정 모드로 동작
+    - code가 없으면 코드 생성 모드로 동작
+    """
+    response = await generate_ai_response(request.prompt, request.code)
+    
+    # 응답 반환
+    return CodeResponse(
+        response=response,
+        fixed_code=response if request.code else None
+    )
 
-# 서버 상태 확인용 엔드포인트
+# 상태 확인 엔드포인트
 @app.get("/health")
 async def health_check():
+    """API 서버의 상태를 확인합니다."""
     return {"status": "healthy"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)
