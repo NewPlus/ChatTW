@@ -6,7 +6,7 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 class CodeLLM:
     """코드 관련 작업을 처리하는 LLM 모델 클래스"""
     
-    def __init__(self, model_name: str = "qwen2.5-coder-32b-instruct-gguf"):
+    def __init__(self, model_name: str = "qwen2.5-coder:0.5b"):
         """LLM 모델 초기화
         
         Args:
@@ -24,6 +24,7 @@ class CodeLLM:
         return Ollama(
             model=self.model_name,
             callbacks=[StreamingStdOutCallbackHandler()],
+            base_url="http://localhost:11434",
             temperature=0.1,  # 코드 생성에는 낮은 temperature가 적합
             top_p=0.95,
             top_k=40,
@@ -41,7 +42,10 @@ class CodeLLM:
             str: 생성된 응답
         """
         try:
-            response = await self.llm.ainvoke(prompt)
+            response = await self.llm.ainvoke(
+                prompt,
+                stream=False  # 스트리밍 비활성화
+            )
             return response
         except Exception as e:
             raise Exception(f"LLM 응답 생성 중 오류 발생: {str(e)}")

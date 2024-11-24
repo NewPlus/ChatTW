@@ -48,6 +48,10 @@ async def fix_code(request: CodeRequest):
         # LLM을 통한 응답 생성
         response = await code_llm.generate_response(formatted_prompt)
         
+        # 응답이 문자열인지 확인
+        if isinstance(response, dict):
+            response = response.get('content', '')
+
         # 응답 파싱
         parts = response.split("2. ")
         if len(parts) != 2:
