@@ -12,7 +12,35 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: 'none',
+            color: null,
+            code: {
+              backgroundColor: 'rgb(var(--tw-prose-pre-bg))',
+              padding: '0.25rem 0.375rem',
+              borderRadius: '0.25rem',
+              fontWeight: '600',
+            },
+            'code::before': {
+              content: '""'
+            },
+            'code::after': {
+              content: '""'
+            },
+            pre: {
+              backgroundColor: 'rgb(var(--tw-prose-pre-bg))',
+              padding: '1rem',
+              borderRadius: '0.375rem',
+              overflow: 'auto',
+            }
+          }
+        }
+      }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography')
+  ],
 } satisfies Config;

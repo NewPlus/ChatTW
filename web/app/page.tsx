@@ -14,9 +14,7 @@ export default function Home() {
     setIsLoading(true)
     
     const requestType = determineRequestType(prompt, code)
-    const endpoint = requestType === 'CODE_GENERATION' 
-      ? 'http://localhost:8000/generate/'
-      : 'http://localhost:8000/fix/'
+    const endpoint = 'http://localhost:8001/generate/'
     
     const userMessage: Message = {
       role: 'user',
@@ -56,11 +54,22 @@ export default function Home() {
   }
 
   return (
-    <main className="relative min-h-screen pb-36">
-      <div className="max-w-5xl mx-auto pt-4">
-        <ChatMessages messages={messages} isLoading={isLoading} />
+    <main className="flex flex-col h-screen bg-white">
+      {/* 대화창 영역 */}
+      <div className="flex-1 overflow-y-auto pb-[280px]">
+        <div className="max-w-5xl mx-auto py-4 px-4">
+          <ChatMessages messages={messages} isLoading={isLoading} />
+        </div>
       </div>
-      <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+
+      {/* 입력창 영역 - border-t 제거하고 그라데이션 강화 */}
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white from-50% via-white via-90% to-transparent">
+        <div className="max-w-5xl mx-auto p-6 pt-8">
+          <div className="flex justify-center">
+            <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+          </div>
+        </div>
+      </div>
     </main>
   )
 }

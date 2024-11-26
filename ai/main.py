@@ -1,11 +1,40 @@
 from typing import Optional
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import aiohttp
+import os
+from typing import List
+
+
+# 환경 변수에서 허용된 오리진 목록을 가져옴
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+ALLOWED_ORIGINS: List[str] = []
+
+if ENVIRONMENT == "production":
+    # 프로덕션 환경의 도메인들
+    ALLOWED_ORIGINS = [
+        "https://your-production-domain.com",
+        "https://api.your-production-domain.com"
+    ]
+else:
+    # 개발 환경의 도메인들
+    ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"
+    ]
+
 
 # FastAPI 앱 생성
 app = FastAPI(title="사내 코딩 챗봇 API")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
+)
 
 # 요청 모델 정의
 class CodeRequest(BaseModel):
@@ -27,15 +56,16 @@ async def generate_ai_response(prompt: str, code: Optional[str] = None) -> str:
     try:
         # 코드 수정 모드와 생성 모드에 따른 프롬프트 구성
         if code:
-            system_prompt = "다음 코드의 오류를 분석하고 수정해주세요:"
+            system_prompt = "당신은 세계에서 가장 뛰어난 프로그래머 입니다. 다음 코드의 오류를 분석하고 수정해주세요:"
             full_prompt = f"{system_prompt}\n\n{code}\n\n질문: {prompt}"
         else:
-            system_prompt = "다음 요구사항에 맞는 코드를 생성해주세요:"
+            system_prompt = "당신은 세계에서 가장 뛰어난 프로그래머 입니다. 다음 요구사항에 맞는 코드를 생성해주세요:"
             full_prompt = f"{system_prompt}\n\n{prompt}"
         
         # 요청 데이터 구성
         data = {
-            "model": "qwen2.5-coder:0.5b",
+            "model": "qwen2.5-coder:3b-instruct-q4_K_M",
+            # "model": "qwen2.5-coder:0.5b",
             "prompt": full_prompt,
             "stream": False
         }
