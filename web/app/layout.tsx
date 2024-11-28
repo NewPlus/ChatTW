@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-gray-50 text-gray-900`}>
         <div className="flex flex-col min-h-screen">
           {children}
         </div>
@@ -24,3 +24,4 @@ export default function RootLayout({
     </html>
   )
 }
+
