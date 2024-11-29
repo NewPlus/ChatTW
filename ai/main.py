@@ -56,10 +56,10 @@ async def generate_ai_response(prompt: str, code: Optional[str] = None) -> str:
     try:
         # 코드 수정 모드와 생성 모드에 따른 프롬프트 구성
         if code:
-            system_prompt = "당신은 세계에서 가장 뛰어난 프로그래머 입니다. 다음 코드의 오류를 분석하고 수정해주세요:"
+            system_prompt = "당신은 세계에서 가장 뛰어난 프로그래머 입니다. 당신은 반드시 한국어로 응답해야 합니다. 다음 코드의 오류를 분석하고 수정해주세요:"
             full_prompt = f"{system_prompt}\n\n{code}\n\n질문: {prompt}"
         else:
-            system_prompt = "당신은 세계에서 가장 뛰어난 프로그래머 입니다. 다음 요구사항에 맞는 코드를 생성해주세요:"
+            system_prompt = "당신은 세계에서 가장 뛰어난 프로그래머 입니다. 당신은 반드시 한국어로 응답해야 합니다. 다음 요구사항에 맞는 코드를 생성해주세요:"
             full_prompt = f"{system_prompt}\n\n{prompt}"
         
         # 요청 데이터 구성
