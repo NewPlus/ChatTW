@@ -15,6 +15,7 @@ npm install -D @tailwindcss/typography
 npm install --save-dev @types/react-markdown
 npm install react-syntax-highlighter
 npm install --save-dev @types/react-syntax-highlighter
+npm install --save-dev jest
 
 rm -rf node_modules
 npm install
