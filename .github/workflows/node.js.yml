@@ -11,18 +11,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    services:
-      mongodb:
-        image: mongo:latest
-        ports:
-          - 27017:27017
-        options: >-
-          --env MONGO_INITDB_ROOT_USERNAME=example
-          --env MONGO_INITDB_ROOT_PASSWORD=example
-        volumes:
-          - mongo-data:/data/db
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
