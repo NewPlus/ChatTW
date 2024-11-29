@@ -9,6 +9,9 @@
     "lint": "next lint",
     "test": "jest"
   },
+  "jest": {
+    "testEnvironment": "node"
+  },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.0",
