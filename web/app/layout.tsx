@@ -16,8 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className={`${inter.className} bg-gray-50 text-gray-900`}>
-        <div className="flex flex-col min-h-screen">
+      <body className={inter.className}>
+        <div className="fixed inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 opacity-10" />
+        <div className="relative min-h-screen">
           {children}
         </div>
       </body>
