@@ -23,18 +23,18 @@ export function ChatMessage({ message }: ChatMessageProps) {
   };
 
   return (
-    <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-6 group`}>
       <div
-        className={`rounded-lg px-4 py-2 max-w-[80%] ${
-          message.role === 'user'
-            ? 'bg-blue-500 text-white'
-            : 'bg-white text-gray-900 shadow-md'
-        }`}
+        className={`relative rounded-2xl px-4 py-2 max-w-[80%] transition-all duration-300
+          ${message.role === 'user'
+            ? 'bg-gradient-to-br from-blue-600/90 to-blue-700/90 text-white backdrop-blur-md rounded-br-sm'
+            : 'bg-white/20 text-gray-900 backdrop-blur-md rounded-bl-sm border border-white/20'
+          } hover:shadow-lg`}
       >
         <div className={`prose prose-sm max-w-none ${
           message.role === 'user' 
-            ? 'prose-invert prose-p:text-white prose-code:text-white prose-headings:text-white prose-strong:text-white' 
-            : 'prose-headings:text-gray-900 prose-p:text-gray-900 prose-code:text-gray-900'
+            ? 'prose-invert prose-p:text-white/90 prose-code:text-white/90 prose-headings:text-white/90 prose-strong:text-white/90' 
+            : 'prose-headings:text-gray-900 prose-p:text-gray-800 prose-code:text-gray-800'
         }`}>
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -43,29 +43,33 @@ export function ChatMessage({ message }: ChatMessageProps) {
               code({ node, inline, className, children, ...props }: any) {
                 const match = /language-(\w+)/.exec(className || '')
                 return !inline && match ? (
-                  <div className="relative group">
-                    <SyntaxHighlighter
-                      style={tomorrow}
-                      language={match[1]}
-                      PreTag="div"
-                      {...props}
-                    >
-                      {String(children).replace(/\n$/, '')}
-                    </SyntaxHighlighter>
-                    <button
-                      onClick={() => handleCopy(String(children))}
-                      className="absolute top-2 right-2 p-1.5 rounded-md bg-gray-800/70 hover:bg-gray-800/90 transition-all duration-200"
-                      aria-label={copyStatus === 'copied' ? '복사됨' : '코드 복사'}
-                    >
-                      {copyStatus === 'copied' ? (
-                        <Check className="w-4 h-4 text-emerald-400" />
-                      ) : (
-                        <Copy className="w-4 h-4 text-gray-200" />
-                      )}
-                    </button>
+                  <div className="relative group/code mt-4">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500/20 to-blue-500/20 rounded-lg blur opacity-75 group-hover/code:opacity-100 transition duration-500"></div>
+                    <div className="relative">
+                      <SyntaxHighlighter
+                        style={tomorrow}
+                        language={match[1]}
+                        PreTag="div"
+                        className="rounded-lg !bg-gray-900/80 !backdrop-blur-sm"
+                        {...props}
+                      >
+                        {String(children).replace(/\n$/, '')}
+                      </SyntaxHighlighter>
+                      <button
+                        onClick={() => handleCopy(String(children))}
+                        className="absolute top-2 right-2 p-1.5 rounded-md bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-200"
+                        aria-label={copyStatus === 'copied' ? '복사됨' : '코드 복사'}
+                      >
+                        {copyStatus === 'copied' ? (
+                          <Check className="w-4 h-4 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-4 h-4 text-gray-200" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  <code className={className} {...props}>
+                  <code className={`${className} px-1.5 py-0.5 rounded-md bg-black/10 backdrop-blur-sm font-mono text-sm`} {...props}>
                     {children}
                   </code>
                 )
@@ -76,24 +80,28 @@ export function ChatMessage({ message }: ChatMessageProps) {
           </ReactMarkdown>
         </div>
         {message.code && !message.content.includes(message.code) && (
-          <div className="mt-2 rounded-lg overflow-hidden relative group">
-            <SyntaxHighlighter
-              language="javascript"
-              style={tomorrow}
-            >
-              {message.code}
-            </SyntaxHighlighter>
-            <button
-              onClick={() => handleCopy(message.code!)}
-              className="absolute top-2 right-2 p-1.5 rounded-md bg-gray-800/70 hover:bg-gray-800/90 transition-all duration-200"
-              aria-label={copyStatus === 'copied' ? '복사됨' : '코드 복사'}
-            >
-              {copyStatus === 'copied' ? (
-                <Check className="w-4 h-4 text-emerald-400" />
-              ) : (
-                <Copy className="w-4 h-4 text-gray-200" />
-              )}
-            </button>
+          <div className="relative group/code mt-4">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500/20 to-blue-500/20 rounded-lg blur opacity-75 group-hover/code:opacity-100 transition duration-500"></div>
+            <div className="relative">
+              <SyntaxHighlighter
+                language="javascript"
+                style={tomorrow}
+                className="rounded-lg !bg-gray-900/80 !backdrop-blur-sm"
+              >
+                {message.code}
+              </SyntaxHighlighter>
+              <button
+                onClick={() => handleCopy(message.code!)}
+                className="absolute top-2 right-2 p-1.5 rounded-md bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-200"
+                aria-label={copyStatus === 'copied' ? '복사됨' : '코드 복사'}
+              >
+                {copyStatus === 'copied' ? (
+                  <Check className="w-4 h-4 text-emerald-400" />
+                ) : (
+                  <Copy className="w-4 h-4 text-gray-200" />
+                )}
+              </button>
+            </div>
           </div>
         )}
       </div>

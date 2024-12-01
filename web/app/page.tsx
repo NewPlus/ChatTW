@@ -54,25 +54,25 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-col h-screen bg-gray-50">
+    <main className="flex flex-col h-screen">
       {/* 헤더 영역 */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white/20 backdrop-blur-md border-b border-white/10 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto py-4 px-4">
           <h1 className="text-2xl font-bold text-gray-900">ChatTW</h1>
         </div>
       </header>
 
       {/* 대화창 영역 */}
-      <div className="flex-1 overflow-y-auto pb-[200px] transition-all duration-300 ease-in-out">
-        <div className="max-w-3xl mx-auto py-8 px-4">
+      <div className="flex-1 overflow-y-auto pb-32">
+        <div className="max-w-3xl mx-auto py-8 px-4 mb-32">
           <ChatMessages messages={messages} isLoading={isLoading} />
         </div>
       </div>
 
       {/* 입력창 영역 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-gray-50 from-50% via-gray-50 via-90% to-transparent">
-        <div className="max-w-3xl mx-auto p-6 pt-8">
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white/80 via-white/50 to-transparent pb-6 pt-4">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="bg-white/20 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20">
             <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
           </div>
         </div>

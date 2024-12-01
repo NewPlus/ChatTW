@@ -1,14 +1,15 @@
-import { ChatMessage } from './chat-message'
-import { Message } from '@/lib/types'
+import React from 'react';
+import { ChatMessage } from './chat-message';
+import { Message } from '@/lib/types';
 
 interface ChatMessagesProps {
-  messages: Message[]
-  isLoading: boolean
+  messages: Message[];
+  isLoading: boolean;
 }
 
 export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   return (
-    <div className="space-y-4 px-4">
+    <div className="space-y-6 px-4">
       {messages.map((message, index) => (
         <ChatMessage key={index} message={message} />
       ))}
@@ -22,6 +23,6 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
